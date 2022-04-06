@@ -6,7 +6,7 @@ import ConfirmEntry from "./entriesMethods/confirmEntry";
 import Follow from "./entriesMethods/follow";
 import Reg from "./entriesMethods/registration";
 import TwitterTweet from "./entriesMethods/twitterTweet";
-import namesList from "./namesLists/7Wr";
+import namesList from "./namesLists/9";
 
 const puppeteer = require('puppeteer-core');
 const axios = require('axios').default;
@@ -15,10 +15,10 @@ const creds = new namesList();
 const utils = new Utils();
 const folow = new Follow();
 const confirmEntry = new ConfirmEntry();
-
+const regMethodId = 0;
 const methods = [
-    'refer', //'twitterFollow',
-    'refer', //'twitterFollow',
+    'twitterFollow', //'twitterFollow',
+    'twitterFollow', //'twitterFollow',
     'telegramFollow',
     'telegramFollow',
     'telegramFollow',
@@ -69,7 +69,7 @@ const selectors = {
     var port;
     var wsEndpoint;
 
-    for (let i=0; i<ids.length; i++){
+    for (let i=4; i<ids.length; i++){
 
         utils.setCaptchaSolvedTimes(0);
 
@@ -88,7 +88,7 @@ const selectors = {
         });
 
         const page = await browser.newPage();
-        await page.goto(refLink, {waitUntil: 'load', timeout: 0});
+        const response = await Utils.retry(async () => await page.goto(refLink, {waitUntil: 'load', timeout: 0}, 1000));
 
         page.on('dialog', async (dialog:any) => {
             console.log(dialog.message());
@@ -127,7 +127,7 @@ const selectors = {
 
         if(classesRegs.length > 1){
             console.log("registration")
-            await Reg.registration(page, methodsId[2], i, creds, selectors); 
+            await Reg.registration(page, methodsId[regMethodId], i, creds, selectors); 
         }
         
 

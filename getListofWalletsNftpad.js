@@ -4,8 +4,9 @@ const https = require('https');
 const axios = require('axios');
 
 const fs = require('fs');
-const creds = require('./namesList7Wrecked');
-const ourWallet = require('./ourWallets')
+const creds = require('./namesList2');
+const ourWallet = require('./ourWallets');
+const { addAbortSignal } = require('stream');
 
 const methods = [
     'refer', //twitterFollow
@@ -19,7 +20,7 @@ const methods = [
     'refer'
 ];
 
-const refLink = 'https://trustpad.io/pool/deadknight';
+const refLink = 'https://nftpad.fi/pool/deadknight';
 
 let captchaSolvedTimes = 0;
 let maxCaptchaSolvedTimes = 1;
@@ -92,17 +93,17 @@ const telegramSelector = " input[name='your_telegram']";
 
         let wallletInput;
         try{
-            wallletInput = await page.waitForSelector("input[type='search']")
+            wallletInput = await page.waitForSelector("div>input[type='search']")
         }catch(e){
             console.log(e);
         }
         if(wallletInput!=null){
             for(i=0;i<ourWallets.length;i++){
 
-                await clear(page, "input[type='search']");
+                await clear(page, "div>input[type='search']");
                 blockingWait(0.5);
 
-                await page.type("input[type='search']", ourWallets[i]);
+                await page.type("div>input[type='search']", ourWallets[i]);
                 blockingWait(0.5);
 
                 let wlList;
@@ -165,3 +166,16 @@ async function clear(page, selector) {
       document.querySelector(selector).value = "";
     }, selector);
   }
+
+
+  function somethn(){
+
+  }
+  somtins4 = () =>{
+
+  }
+  someting3 = () => addAbortSignal;
+
+//   something2 = (){
+//       asfsddf=1
+//   }

@@ -6,7 +6,7 @@ import ConfirmEntry from "./entriesMethods/confirmEntry";
 import Follow from "./entriesMethods/follow";
 import Reg from "./entriesMethods/registration";
 import TwitterTweet from "./entriesMethods/twitterTweet";
-import namesList from "./namesLists/3";
+import namesList from "./namesLists/8";
 
 const puppeteer = require('puppeteer-core');
 const axios = require('axios').default;

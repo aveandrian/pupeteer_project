@@ -4,10 +4,9 @@ import Utils from "./entriesMethods/utils";
 import { Puppeteer } from "puppeteer-core";
 import ConfirmEntry from "./entriesMethods/confirmEntry";
 import Follow from "./entriesMethods/follow";
-import Reg from "./entriesMethods/registrationCustom";
+import Reg from "./entriesMethods/registration";
 import TwitterTweet from "./entriesMethods/twitterTweet";
-import namesList from "./namesLists/8";
-
+import namesList from "./namesLists/6";
 
 const puppeteer = require('puppeteer-core');
 const axios = require('axios').default;
@@ -17,20 +16,25 @@ const utils = new Utils();
 const folow = new Follow();
 const confirmEntry = new ConfirmEntry();
 
+const regMethodId = 4;
+
 const methods = [
-    'refer',
-    'refer',
-    'twitterFollow', //'twitterFollow',
-    'confirmEntryContinue',
-    'refer',
     'refer', //'twitterFollow',
+    'refer', //'twitterFollow',
+    'refer', //'twitterFollow',
+    'refer', //'twitterFollow',
+    'telegramFollow',
     'refer',
-    'confirmEntryContinue',
-    'confirmEntryContinue',
-    'walletInput'
+    'refer',
+    'refer',
+    'refer',
+    'refer',
+    'refer',
+    'refer',
+    'refer',
 ];
 
-const refLink = 'https://wn.nr/cQvb6Q';
+const refLink = 'https://wn.nr/Q7D8Gs';
 
 utils.setCaptchaSolvedTimes(0);
 utils.setMaxCaptchaSolvedTimes(1);
@@ -41,10 +45,8 @@ const selectors = {
     firstMethodId: '#em6125606',
     nameSelector: " input[name='name']",
     emailSelector:  " input[name='email']",
-    walletSelector: "body > div > div > div > div.popup-blocks-container > div > div > div:nth-child(1) > div:nth-child(5) > div:nth-child(2) > div:nth-child(2) > div > form > fieldset.inputs > div.form-horizontal > div > div > div:nth-child(4) > div > label > div.form-wrapper > input",
+    walletSelector: " textarea[name='your_bep20_wallet_address']",
     telegramSelector: " input[name='your_telegram']",
-    termsAgreeCheckboxSelector: "body > div > div > div > div.popup-blocks-container > div > div > div:nth-child(1) > div:nth-child(5) > div:nth-child(2) > div:nth-child(2) > div > form > fieldset.inputs > div.form-horizontal > div > div > div:nth-child(5) > div > div > label > input",
-    agreeCheckboxSelector: "body > div > div > div > div.popup-blocks-container > div > div > div:nth-child(1) > div:nth-child(5) > div:nth-child(2) > div:nth-child(2) > div > form > fieldset.inputs > div.form-horizontal > div > div > div:nth-child(6) > div > div > label > input"
 };
 
 
@@ -78,15 +80,15 @@ const selectors = {
     for (let i=0; i<ids.length; i++){
 
         utils.setCaptchaSolvedTimes(0);
-
-        await axios.get('http://localhost:3001/v1.0/browser_profiles/'+ ids[i]+'/start?automation=1', {headers: {
+        
+        await Utils.retry(async () => await axios.get('http://localhost:3001/v1.0/browser_profiles/'+ ids[i]+'/start?automation=1', {headers: {
         'Authorization': 'Bearer ' + data.token,
         }})
         .then(function(response:any) {
 
             port = response.data.automation.port; 
             wsEndpoint = response.data.automation.wsEndpoint;   
-        })
+        }),1000);
 
 
         const browser = await puppeteer.connect({
@@ -97,16 +99,22 @@ const selectors = {
         
       
         const page = await browser.newPage();
-        await page.goto(refLink, {waitUntil: 'load', timeout: 0});
-
+        try{
+        await Utils.retry(async () => await page.goto(refLink, {waitUntil: 'load', timeout: 0}),1000);
+        
         page.on('dialog', async (dialog:any) => {
             console.log(dialog.message());
             await dialog.dismiss();
         });
 
-        page.bringToFront();
+         page.bringToFront();
 
+        }catch(e){console.log(e)}
 
+        await Utils.blockingWait(5);
+
+        
+        try{
         const methodsId = await page.evaluate(
             () => Array.from(
               document.querySelectorAll('div[class*="entry-method"]'),
@@ -132,15 +140,15 @@ const selectors = {
           );
         console.log(classesRegs)
 
-        await Utils.blockingWait(2);
+        // await Utils.blockingWait(2);
 
         if(classesRegs.length > 1){
             console.log("registration")
-            await Reg.registration(page, methodsId[0], i, creds, selectors); 
+            await Reg.registration(page, methodsId[regMethodId], i, creds, selectors); 
         }
         
 
-        await Utils.blockingWait(2);
+        // await Utils.blockingWait(2);
 
         for(let j=0;j<methodsId.length;j++){
             if(methods[j] == 'refer')
@@ -178,10 +186,6 @@ const selectors = {
                 }else if(methods[j] == "confirmEntry"){
                     try{
                         await confirmEntry.entry(page, browser, methodsId[j]);
-                    }catch(e){console.log(e)}
-                }else if(methods[j] == "confirmEntryContinue"){
-                    try{
-                        await confirmEntry.entryAndContinue(page, browser, methodsId[j]);
                     }catch(e){console.log(e)}
                 }else if(methods[j] == "telegramInput"){
                     try{
@@ -235,6 +239,7 @@ const selectors = {
                 console.log(e)
             }
         }  
+    }catch(e){console.log(e)}
 
     }
 

@@ -4,10 +4,9 @@ import Utils from "./entriesMethods/utils";
 import { Puppeteer } from "puppeteer-core";
 import ConfirmEntry from "./entriesMethods/confirmEntry";
 import Follow from "./entriesMethods/follow";
-import Reg from "./entriesMethods/registrationCustom";
+import Reg from "./entriesMethods/registration";
 import TwitterTweet from "./entriesMethods/twitterTweet";
-import namesList from "./namesLists/8";
-
+import namesList from "./namesLists/7Wr";
 
 const puppeteer = require('puppeteer-core');
 const axios = require('axios').default;
@@ -17,20 +16,18 @@ const utils = new Utils();
 const folow = new Follow();
 const confirmEntry = new ConfirmEntry();
 
+const regMethodId = 2;
+
 const methods = [
-    'refer',
-    'refer',
-    'twitterFollow', //'twitterFollow',
-    'confirmEntryContinue',
-    'refer',
     'refer', //'twitterFollow',
-    'refer',
-    'confirmEntryContinue',
-    'confirmEntryContinue',
-    'walletInput'
+    'refer', //'twitterFollow',
+    'telegramFollow',
+    'telegramFollow',
+    'telegramFollow',
+    'refer'
 ];
 
-const refLink = 'https://wn.nr/cQvb6Q';
+const refLink = 'https://wn.nr/4CqRNm';
 
 utils.setCaptchaSolvedTimes(0);
 utils.setMaxCaptchaSolvedTimes(1);
@@ -41,10 +38,8 @@ const selectors = {
     firstMethodId: '#em6125606',
     nameSelector: " input[name='name']",
     emailSelector:  " input[name='email']",
-    walletSelector: "body > div > div > div > div.popup-blocks-container > div > div > div:nth-child(1) > div:nth-child(5) > div:nth-child(2) > div:nth-child(2) > div > form > fieldset.inputs > div.form-horizontal > div > div > div:nth-child(4) > div > label > div.form-wrapper > input",
+    walletSelector: " input[name='field_2h333936w1u1x28191e1cw2f2p30302t38w1t2s2s362t3737']",
     telegramSelector: " input[name='your_telegram']",
-    termsAgreeCheckboxSelector: "body > div > div > div > div.popup-blocks-container > div > div > div:nth-child(1) > div:nth-child(5) > div:nth-child(2) > div:nth-child(2) > div > form > fieldset.inputs > div.form-horizontal > div > div > div:nth-child(5) > div > div > label > input",
-    agreeCheckboxSelector: "body > div > div > div > div.popup-blocks-container > div > div > div:nth-child(1) > div:nth-child(5) > div:nth-child(2) > div:nth-child(2) > div > form > fieldset.inputs > div.form-horizontal > div > div > div:nth-child(6) > div > div > label > input"
 };
 
 
@@ -79,14 +74,14 @@ const selectors = {
 
         utils.setCaptchaSolvedTimes(0);
 
-        await axios.get('http://localhost:3001/v1.0/browser_profiles/'+ ids[i]+'/start?automation=1', {headers: {
+        await Utils.retry(async () => await axios.get('http://localhost:3001/v1.0/browser_profiles/'+ ids[i]+'/start?automation=1', {headers: {
         'Authorization': 'Bearer ' + data.token,
         }})
         .then(function(response:any) {
 
             port = response.data.automation.port; 
             wsEndpoint = response.data.automation.wsEndpoint;   
-        })
+        }),1000);
 
 
         const browser = await puppeteer.connect({
@@ -97,7 +92,7 @@ const selectors = {
         
       
         const page = await browser.newPage();
-        await page.goto(refLink, {waitUntil: 'load', timeout: 0});
+        await Utils.retry(async () => await page.goto(refLink, {waitUntil: 'load', timeout: 0}),1000);
 
         page.on('dialog', async (dialog:any) => {
             console.log(dialog.message());
@@ -106,7 +101,7 @@ const selectors = {
 
         page.bringToFront();
 
-
+        try{
         const methodsId = await page.evaluate(
             () => Array.from(
               document.querySelectorAll('div[class*="entry-method"]'),
@@ -136,7 +131,7 @@ const selectors = {
 
         if(classesRegs.length > 1){
             console.log("registration")
-            await Reg.registration(page, methodsId[0], i, creds, selectors); 
+            await Reg.registration(page, methodsId[regMethodId], i, creds, selectors); 
         }
         
 
@@ -178,10 +173,6 @@ const selectors = {
                 }else if(methods[j] == "confirmEntry"){
                     try{
                         await confirmEntry.entry(page, browser, methodsId[j]);
-                    }catch(e){console.log(e)}
-                }else if(methods[j] == "confirmEntryContinue"){
-                    try{
-                        await confirmEntry.entryAndContinue(page, browser, methodsId[j]);
                     }catch(e){console.log(e)}
                 }else if(methods[j] == "telegramInput"){
                     try{
@@ -235,6 +226,7 @@ const selectors = {
                 console.log(e)
             }
         }  
+    }catch(e){console.log(e)}
 
     }
 

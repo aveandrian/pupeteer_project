@@ -6,8 +6,7 @@ import ConfirmEntry from "./entriesMethods/confirmEntry";
 import Follow from "./entriesMethods/follow";
 import Reg from "./entriesMethods/registrationCustom";
 import TwitterTweet from "./entriesMethods/twitterTweet";
-import namesList from "./namesLists/8";
-
+import namesList from "./namesLists/2";
 
 const puppeteer = require('puppeteer-core');
 const axios = require('axios').default;
@@ -17,20 +16,26 @@ const utils = new Utils();
 const folow = new Follow();
 const confirmEntry = new ConfirmEntry();
 
+const regMethodId = 0;
+
 const methods = [
-    'refer',
-    'refer',
     'twitterFollow', //'twitterFollow',
-    'confirmEntryContinue',
+    'confirmEntryAndContinue', //'twitterFollow',
+    'confirmEntryAndContinue', //'twitterFollow',
+    'confirmEntryWithTimeout', //'twitterFollow',
     'refer',
-    'refer', //'twitterFollow',
-    'refer',
-    'confirmEntryContinue',
-    'confirmEntryContinue',
-    'walletInput'
+    'confirmEntryAndContinue',
+    'confirmEntryAndContinue',
+    'confirmEntryAndContinue',
+    'confirmEntryAndContinue',
+    'confirmEntryAndContinue',
+    'confirmEntryWithTimeout',
+    'twitterFollow',
+    'twitterFollow',
+    'refer'
 ];
 
-const refLink = 'https://wn.nr/cQvb6Q';
+const refLink = 'https://wn.nr/ZhddqN';
 
 utils.setCaptchaSolvedTimes(0);
 utils.setMaxCaptchaSolvedTimes(1);
@@ -41,10 +46,8 @@ const selectors = {
     firstMethodId: '#em6125606',
     nameSelector: " input[name='name']",
     emailSelector:  " input[name='email']",
-    walletSelector: "body > div > div > div > div.popup-blocks-container > div > div > div:nth-child(1) > div:nth-child(5) > div:nth-child(2) > div:nth-child(2) > div > form > fieldset.inputs > div.form-horizontal > div > div > div:nth-child(4) > div > label > div.form-wrapper > input",
-    telegramSelector: " input[name='your_telegram']",
-    termsAgreeCheckboxSelector: "body > div > div > div > div.popup-blocks-container > div > div > div:nth-child(1) > div:nth-child(5) > div:nth-child(2) > div:nth-child(2) > div > form > fieldset.inputs > div.form-horizontal > div > div > div:nth-child(5) > div > div > label > input",
-    agreeCheckboxSelector: "body > div > div > div > div.popup-blocks-container > div > div > div:nth-child(1) > div:nth-child(5) > div:nth-child(2) > div:nth-child(2) > div > form > fieldset.inputs > div.form-horizontal > div > div > div:nth-child(6) > div > div > label > input"
+    walletSelector: " input[name='bsc_wallet_adress']",
+    telegramSelector: " input[name='telegram_username']",
 };
 
 
@@ -62,7 +65,7 @@ const selectors = {
 
 
     await axios.get('https://anty-api.com/browser_profiles', {headers: {
-        'Authorization': 'Bearer ' + data.token,
+        'Authorization': 'Bearer ' +  data.token,
     }})
     .then(function(response:any) {
         for(let i=0; i<(response.data.data).length; i++ ){
@@ -79,14 +82,14 @@ const selectors = {
 
         utils.setCaptchaSolvedTimes(0);
 
-        await axios.get('http://localhost:3001/v1.0/browser_profiles/'+ ids[i]+'/start?automation=1', {headers: {
+        await Utils.retry(async () => await axios.get('http://localhost:3001/v1.0/browser_profiles/'+ ids[i]+'/start?automation=1', {headers: {
         'Authorization': 'Bearer ' + data.token,
         }})
         .then(function(response:any) {
 
             port = response.data.automation.port; 
             wsEndpoint = response.data.automation.wsEndpoint;   
-        })
+        }),1000);
 
 
         const browser = await puppeteer.connect({
@@ -97,7 +100,7 @@ const selectors = {
         
       
         const page = await browser.newPage();
-        await page.goto(refLink, {waitUntil: 'load', timeout: 0});
+        await Utils.retry(async () => await page.goto(refLink, {waitUntil: 'load', timeout: 0}),1000);
 
         page.on('dialog', async (dialog:any) => {
             console.log(dialog.message());
@@ -106,7 +109,7 @@ const selectors = {
 
         page.bringToFront();
 
-
+        try{
         const methodsId = await page.evaluate(
             () => Array.from(
               document.querySelectorAll('div[class*="entry-method"]'),
@@ -136,7 +139,7 @@ const selectors = {
 
         if(classesRegs.length > 1){
             console.log("registration")
-            await Reg.registration(page, methodsId[0], i, creds, selectors); 
+            await Reg.registration(page, methodsId[regMethodId], i, creds, selectors); 
         }
         
 
@@ -178,16 +181,20 @@ const selectors = {
                 }else if(methods[j] == "confirmEntry"){
                     try{
                         await confirmEntry.entry(page, browser, methodsId[j]);
-                    }catch(e){console.log(e)}
-                }else if(methods[j] == "confirmEntryContinue"){
+                    }catch(e){console.log(e)}}
+                else if(methods[j] == "confirmEntryAndContinue"){
                     try{
                         await confirmEntry.entryAndContinue(page, browser, methodsId[j]);
                     }catch(e){console.log(e)}
                 }else if(methods[j] == "telegramInput"){
                     try{
                         await Inputs.telegram(page, browser, methodsId[j], i, creds);
-                }catch(e){console.log(e)}
-                }else if(methods[j] == "emailInput"){
+                    }catch(e){console.log(e)}
+                }else if(methods[j] == "confirmEntryWithTimeout"){
+                    try{
+                        await confirmEntry.entryWithTimeout(page, browser, methodsId[j]);
+                    }catch(e){console.log(e)}
+                } else if(methods[j] == "emailInput"){
                     try{
                         await Inputs.email(page, browser, methodsId[j], i, creds);
                     }catch(e){console.log(e)}
@@ -234,7 +241,8 @@ const selectors = {
             catch(e){
                 console.log(e)
             }
-        }  
+        } 
+    }catch(e){console.log(e)} 
 
     }
 

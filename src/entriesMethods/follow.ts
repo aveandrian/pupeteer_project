@@ -15,13 +15,15 @@ export class Follow{
             }catch(e){
                 console.log("Method not found")
             }
-            if(firstMethod!=null)
+            if(firstMethod!=null){
+                await firstMethod.focus();
                 await firstMethod.click();
+            }
         }
 
         await Utils.checkForCaptcha(page);
 
-        await Utils.blockingWait(2)
+        await Utils.blockingWait(5)
 
         let classes = await Utils.getClasses(page,'div' + methodId)
         // console.log(classes[0].includes('completed-entry-method'));

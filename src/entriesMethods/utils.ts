@@ -75,5 +75,16 @@ export class Utils{
         console.log(classesRegs)
         return classesRegs;
     }
+    static retry:any = (fn:any, ms:any) => new Promise(resolve => { 
+        fn()
+          .then(resolve)
+          .catch(() => {
+            setTimeout(() => {
+
+              console.log('retrying...');
+              Utils.retry(fn, ms).then(resolve);
+            }, ms);
+          })
+      });
 }
 export default Utils;

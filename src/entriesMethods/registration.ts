@@ -8,6 +8,7 @@ export class Reg{
             firstMethod = await page.waitForSelector('div' + methodId, {visible:true});
         }catch(e){}
         if(firstMethod != null){
+            await firstMethod.focus();
             await firstMethod.click();
         }
 
@@ -68,9 +69,10 @@ export class Reg{
         }catch(e){
             console.log(e);
         }
-        if(saveInfoButton!=null)
-            saveInfoButton.click();
-
+        if(saveInfoButton!=null){
+            await saveInfoButton.focus();
+            await saveInfoButton.click();
+        }
         // await BlockingWait.blockingWait(2);
 
         // const twitterLoging = await page.waitForSelector('a[title="Twitter"]', {visible:true});

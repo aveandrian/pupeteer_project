@@ -6,7 +6,7 @@ import ConfirmEntry from "./entriesMethods/confirmEntry";
 import Follow from "./entriesMethods/follow";
 import Reg from "./entriesMethods/registration";
 import TwitterTweet from "./entriesMethods/twitterTweet";
-import namesList from "./namesLists/7Wr";
+import namesList from "./namesLists/9";
 
 const puppeteer = require('puppeteer-core');
 const axios = require('axios').default;
@@ -15,10 +15,12 @@ const creds = new namesList();
 const utils = new Utils();
 const folow = new Follow();
 const confirmEntry = new ConfirmEntry();
-
+const regMethodId = 0;
 const methods = [
     'twitterFollow', //'twitterFollow',
-    'twitterFollow', //'twitterFollow',
+    'twitterFollow', //'twitterFollow', 
+    'refer', //'twitterFollow',
+    'refer', //'twitterFollow',
     'telegramFollow',
     'telegramFollow',
     'telegramFollow',
@@ -129,7 +131,7 @@ const selectors = {
 
         if(classesRegs.length > 1){
             console.log("registration")
-            await Reg.registration(page, methodsId[0], i, creds, selectors); 
+            await Reg.registration(page, methodsId[regMethodId], i, creds, selectors); 
         }
         
 
