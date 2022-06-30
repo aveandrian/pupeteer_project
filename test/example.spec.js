@@ -7,8 +7,8 @@ var myTOKEN;
 test('asdasd',async ({ request }) => {
   const newIssue = await request.post(`https://anty-api.com/auth/login`, {
     data: {
-      'username': 'trancemilly7@gmail.com',
-      'password': '030894Andrey',
+      'username': '',
+      'password': '',
     }
   });
 
